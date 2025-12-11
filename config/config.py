@@ -13,8 +13,7 @@ class Config:
     BROWSER = "chrome"
     
     # האם להריץ בלי לראות את הדפדפן (Headless)?
-    # כרגע False כדי שתראי מה קורה על המסך
-    HEADLESS = False
+    HEADLESS = True
 
     # זמן המתנה דיפולטיבי (בשניות) לאלמנטים
     IMPLICIT_WAIT = 10
