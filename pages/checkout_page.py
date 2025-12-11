@@ -1,10 +1,10 @@
 # pages/checkout_page.py
 from selenium.webdriver.common.by import By
 from .base_page import BasePage
-import time
 
 class CheckoutPage(BasePage):
     
+    # Locators
     CHECKOUT_BUTTON = (By.ID, "checkout")
     FIRST_NAME_INPUT = (By.ID, "first-name")
     LAST_NAME_INPUT = (By.ID, "last-name")
@@ -14,39 +14,39 @@ class CheckoutPage(BasePage):
     COMPLETE_HEADER = (By.CLASS_NAME, "complete-header")
 
     def click_checkout(self):
-        self.click_element_js(self.CHECKOUT_BUTTON)
+        # שימוש בקליק הרגיל והטוב שלנו (שמחכה ל-Visibility)
+        self.click(self.CHECKOUT_BUTTON)
 
     def fill_details(self, first_name, last_name, zip_code):
+        """
+        מילוי פרטים בצורה בטוחה עם וריפיקציה.
+        """
+        # מילוי רגיל
         self.write(self.FIRST_NAME_INPUT, first_name)
         self.write(self.LAST_NAME_INPUT, last_name)
         self.write(self.ZIP_INPUT, zip_code)
+        
+        # --- שלב האימות (Real World Practice) ---
+        # אנחנו בודקים שהדפדפן אכן קלט את הערך בשדה האחרון.
+        # אם זה ריק משום מה, נמלא שוב.
+        input_value = self.find(self.ZIP_INPUT).get_attribute("value")
+        if not input_value:
+            self.write(self.ZIP_INPUT, zip_code)
 
     def click_continue(self):
         """
-        מנגנון חכם: מנסה ללחוץ ולוודא מעבר, עד 3 פעמים.
+        לחיצה על Continue והמתנה למעבר דף.
         """
-        btn = self.find(self.CONTINUE_BUTTON)
+        self.click(self.CONTINUE_BUTTON)
         
-        # לולאה שמנסה עד 3 פעמים
-        for i in range(3):
-            self.driver.execute_script("arguments[0].click();", btn)
-            time.sleep(2) # נותנים לאתר 2 שניות להגיב
-            
-            if "checkout-step-two" in self.driver.current_url:
-                return # הצלחנו! יוצאים מהפונקציה
-            
-            print(f"Retry {i+1}: Click didn't work, trying again...")
-        
-        # אם הגענו לפה, זה נכשל 3 פעמים - ניתן ל-Wait לזרוק את השגיאה
+        # אנחנו מצפים לעבור לדף step-two.
+        # ה-wait כאן הוא הדבר הנכון לעשות.
         self.wait.until(lambda d: "checkout-step-two" in d.current_url)
 
     def click_finish(self):
-        btn = self.find(self.FINISH_BUTTON)
-        self.driver.execute_script("arguments[0].click();", btn)
+        # וידוא שאנחנו בדף הנכון לפני לחיצה
+        if "checkout-step-two" in self.driver.current_url:
+            self.click(self.FINISH_BUTTON)
 
     def get_success_message(self):
         return self.get_text(self.COMPLETE_HEADER)
-
-    def click_element_js(self, locator):
-        element = self.find(locator)
-        self.driver.execute_script("arguments[0].click();", element)
