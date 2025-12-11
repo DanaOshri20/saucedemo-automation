@@ -1,7 +1,7 @@
 # pages/cart_page.py
 from selenium.webdriver.common.by import By
 from .base_page import BasePage
-
+import time
 
 class CartPage(BasePage):
     
@@ -26,12 +26,14 @@ class CartPage(BasePage):
     def remove_first_item(self):
         """
         מסיר את הפריט הראשון בעגלה.
-        במקום להסתבך עם CSS Selector, אנחנו מוצאים את כל כפתורי המחיקה
-        ולוחצים על הראשון שבהם.
+        משתמש ב-JS Click כדי לוודא שהלחיצה נקלטת גם בעומס.
         """
         # מוצאים את כל כפתורי ה-Remove בדף
         buttons = self.find_all(self.REMOVE_BUTTONS)
         
-        # אם יש כפתורים, לוחצים על הראשון (אינדקס 0)
         if buttons:
-            buttons[0].click()
+            # לחיצה חכמה באמצעות JS
+            self.driver.execute_script("arguments[0].click();", buttons[0])
+            
+            # המתנה קריטית: נותנים לאתר שנייה לעדכן את העגלה ולמחוק את השורה
+            time.sleep(1)
